@@ -103,7 +103,7 @@ public class UserRepository {
      *
      * @param user объект User с обновлёнными данными
      */
-    public void updateUser(User user) {
+    public void update(User user) {
         try (Connection connection = DatabaseUtil.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(SQL_UPDATE_USER)) {
             preparedStatement.setString(1, user.getName());
