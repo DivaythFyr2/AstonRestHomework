@@ -1,7 +1,7 @@
-package com.example.astonrest.config.mapper;
+package com.example.astonrest.mapper;
 
-import com.example.astonrest.config.dto.WorkoutDTO;
-import com.example.astonrest.config.entity.Workout;
+import com.example.astonrest.dto.WorkoutDTO;
+import com.example.astonrest.entity.Workout;
 
 public class WorkoutMapper {
     /**
@@ -11,7 +11,7 @@ public class WorkoutMapper {
      * @return объект WorkoutDTO без ID и userId
      */
     public static WorkoutDTO toDTO(Workout workout) {
-        return new WorkoutDTO(workout.getType(), workout.getDuration());
+        return new WorkoutDTO(workout.getUserId(), workout.getType(), workout.getDuration());
     }
 
     /**

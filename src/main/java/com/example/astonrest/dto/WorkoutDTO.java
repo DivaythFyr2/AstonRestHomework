@@ -1,4 +1,4 @@
-package com.example.astonrest.config.dto;
+package com.example.astonrest.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,6 +14,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class WorkoutDTO {
+    private int userId;
     private String type;
     private int duration;
+
 }

@@ -1,7 +1,7 @@
-package com.example.astonrest.config.repository;
+package com.example.astonrest.repository;
 
-import com.example.astonrest.config.entity.Workout;
-import com.example.astonrest.config.util.DatabaseUtil;
+import com.example.astonrest.entity.Workout;
+import com.example.astonrest.util.DatabaseUtil;
 
 import java.sql.*;
 import java.util.ArrayList;

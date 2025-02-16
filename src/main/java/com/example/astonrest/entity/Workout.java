@@ -1,4 +1,4 @@
-package com.example.astonrest.config.entity;
+package com.example.astonrest.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,4 +1,4 @@
-package com.example.astonrest.config.dto;
+package com.example.astonrest.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

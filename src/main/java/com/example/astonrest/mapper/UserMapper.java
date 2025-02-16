@@ -1,7 +1,7 @@
-package com.example.astonrest.config.mapper;
+package com.example.astonrest.mapper;
 
-import com.example.astonrest.config.dto.UserDTO;
-import com.example.astonrest.config.entity.User;
+import com.example.astonrest.dto.UserDTO;
+import com.example.astonrest.entity.User;
 
 public class UserMapper {
     /**

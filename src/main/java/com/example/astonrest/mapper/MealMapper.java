@@ -1,7 +1,7 @@
-package com.example.astonrest.config.mapper;
+package com.example.astonrest.mapper;
 
-import com.example.astonrest.config.dto.MealDTO;
-import com.example.astonrest.config.entity.Meal;
+import com.example.astonrest.dto.MealDTO;
+import com.example.astonrest.entity.Meal;
 
 public class MealMapper {
 
