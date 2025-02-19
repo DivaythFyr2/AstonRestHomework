@@ -11,7 +11,7 @@ public class WorkoutMapper {
      * @return объект WorkoutDTO без ID и userId
      */
     public static WorkoutDTO toDTO(Workout workout) {
-        return new WorkoutDTO(workout.getUserId(), workout.getType(), workout.getDuration());
+        return new WorkoutDTO(workout.getType(), workout.getDuration(), workout.getCaloriesBurned(), workout.getUserId());
     }
 
     /**
@@ -22,6 +22,6 @@ public class WorkoutMapper {
      * @return объект Workout
      */
     public static Workout toEntity(WorkoutDTO workoutDTO) {
-        return new Workout(0, 0, workoutDTO.getType(), workoutDTO.getDuration(), 0);
+        return new Workout(0, workoutDTO.getType(), workoutDTO.getDuration(), workoutDTO.getCaloriesBurned(), workoutDTO.getUserId());
     }
 }

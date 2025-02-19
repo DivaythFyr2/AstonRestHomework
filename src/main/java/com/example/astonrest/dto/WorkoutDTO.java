@@ -14,8 +14,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class WorkoutDTO {
-    private int userId;
     private String type;
     private int duration;
-
+    private int caloriesBurned;
+    private int userId;
 }

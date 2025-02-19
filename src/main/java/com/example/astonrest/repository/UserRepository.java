@@ -132,4 +132,23 @@ public class UserRepository {
             e.printStackTrace();
         }
     }
+
+    /**
+     * Проверяет, существует ли пользователь с данным ID.
+     */
+    public boolean doesUserExist(int userId) {
+        String sql = "SELECT COUNT(*) FROM users WHERE id = ?";
+        try(Connection connection = DatabaseUtil.getConnection();
+            PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, userId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            if(resultSet.next()) {
+                return resultSet.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

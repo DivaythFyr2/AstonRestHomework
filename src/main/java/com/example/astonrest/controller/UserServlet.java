@@ -1,8 +1,14 @@
 package com.example.astonrest.controller;
 
+import com.example.astonrest.dto.MealDTO;
 import com.example.astonrest.dto.UserDTO;
+import com.example.astonrest.dto.WorkoutDTO;
+import com.example.astonrest.repository.MealRepository;
 import com.example.astonrest.repository.UserRepository;
+import com.example.astonrest.repository.WorkoutRepository;
+import com.example.astonrest.service.MealService;
 import com.example.astonrest.service.UserService;
+import com.example.astonrest.service.WorkoutService;
 import com.google.gson.Gson;
 
 
@@ -18,12 +24,16 @@ import java.util.List;
 
 public class UserServlet extends HttpServlet {
     private UserService userService;
+    private WorkoutService workoutService;
+    private MealService mealService;
     private final Gson gson = new Gson();
     private static final String CONTENT_TYPE = "application/json";
 
     @Override
     public void init() {
         this.userService = new UserService(new UserRepository());
+        this.workoutService = new WorkoutService(new WorkoutRepository(), new UserRepository());
+        this.mealService = new MealService(new MealRepository());
     }
 
     /**
@@ -40,15 +50,33 @@ public class UserServlet extends HttpServlet {
             List<UserDTO> users = userService.getAllUsers();
             out.print(gson.toJson(users));
         } else {
+            String[] pathParts = pathInfo.split("/");
 
             try {
-                int id = Integer.parseInt(pathInfo.substring(1));
-                UserDTO user = userService.getUserById(id);
-                if (user != null) {
-                    out.print(gson.toJson(user));
+                int id = Integer.parseInt(pathParts[1]);
+
+                if (pathParts.length == 3) {
+                    if ("workouts".equals(pathParts[2])) {
+                        List<WorkoutDTO> userWorkouts = workoutService.getWorkoutsByUserId(id);
+                        out.print(gson.toJson(userWorkouts));
+                    } else if ("meals".equals(pathParts[2])) {
+                        List<MealDTO> userMeals = mealService.getMealsByUserId(id);
+                        out.print(gson.toJson(userMeals));
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                        out.print("{\"error\": \"Invalid request format\"}");
+                    }
+                } else if (pathParts.length == 2) {
+                    UserDTO user = userService.getUserById(id);
+                    if (user != null) {
+                        out.print(gson.toJson(user));
+                    } else {
+                        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                        out.print("{\"error\": \"User not found\"}");
+                    }
                 } else {
-                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                    out.print("{\"error\": \"User not found\"}");
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    out.print("{\"error\": \"Invalid request format\"}");
                 }
             } catch (NumberFormatException e) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
