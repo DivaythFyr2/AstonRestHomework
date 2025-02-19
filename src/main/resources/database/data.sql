@@ -1,23 +1,25 @@
--- Наполняем таблицу пользователей
+-- Добавляем пользователей
 INSERT INTO users (name, age, weight, height) VALUES
-                                                  ('John Doe', 30, 80.0, 180.0),
-                                                  ('Alice Smith', 28, 65.5, 170.0),
-                                                  ('Bob Johnson', 35, 90.2, 175.0);
+                                                  ('Alice', 25, 60.5, 165),
+                                                  ('Bob', 30, 75.2, 180),
+                                                  ('Charlie', 35, 85.3, 175);
 
--- Наполняем таблицу тренировок
-INSERT INTO workouts (user_id, type, duration, calories_burned) VALUES
-                                                                    (1, 'running', 30, 300),
-                                                                    (1, 'cycling', 45, 270),
-                                                                    (2, 'swimming', 40, 320);
+-- Добавляем тренировки для пользователей
+INSERT INTO workouts (type, duration, calories_burned, user_id) VALUES
+                                                                    ('running', 30, 360, 1),  -- Тренировка для Alice
+                                                                    ('cycling', 45, 315, 2),  -- Тренировка для Bob
+                                                                    ('swimming', 60, 480, 3); -- Тренировка для Charlie
 
--- Наполняем таблицу еды
+-- Добавляем блюда
 INSERT INTO meals (name, calories) VALUES
                                        ('Chicken Salad', 350),
-                                       ('Pasta', 500),
-                                       ('Protein Shake', 250);
+                                       ('Steak', 600),
+                                       ('Oatmeal', 250),
+                                       ('Pasta', 500);
 
--- Связываем пользователей с едой
+-- Связываем пользователей с приёмами пищи
 INSERT INTO user_meals (user_id, meal_id) VALUES
-                                              (1, 1), -- John Doe ел Chicken Salad
-                                              (1, 2), -- John Doe ел Pasta
-                                              (2, 3); -- Alice Smith выпила Protein Shake
+                                              (1, 1), -- Alice ела Chicken Salad
+                                              (1, 3), -- Alice ела Oatmeal
+                                              (2, 2), -- Bob ел Steak
+                                              (3, 4); -- Charlie ел Pasta

@@ -3,6 +3,7 @@ package com.example.astonrest.service;
 import com.example.astonrest.dto.WorkoutDTO;
 import com.example.astonrest.entity.Workout;
 import com.example.astonrest.mapper.WorkoutMapper;
+import com.example.astonrest.repository.UserRepository;
 import com.example.astonrest.repository.WorkoutRepository;
 
 import java.util.List;
@@ -10,9 +11,11 @@ import java.util.stream.Collectors;
 
 public class WorkoutService {
     private final WorkoutRepository workoutRepository;
+    private final UserRepository userRepository;
 
-    public WorkoutService(WorkoutRepository workoutRepository) {
+    public WorkoutService(WorkoutRepository workoutRepository, UserRepository userRepository) {
         this.workoutRepository = workoutRepository;
+        this.userRepository = userRepository;
     }
 
     /**
@@ -21,9 +24,14 @@ public class WorkoutService {
      * @param workoutDTO DTO тренировки
      * @param userId     ID пользователя
      */
-    public void createWorkout(WorkoutDTO workoutDTO, int userId) {
+    public void createWorkoutForUser(WorkoutDTO workoutDTO, int userId) {
+        if(!userRepository.doesUserExist(userId)) {
+            throw new IllegalArgumentException("User with ID " + userId + " does not exist.");
+        }
         int caloriesBurned = calculateCalories(workoutDTO.getType(), workoutDTO.getDuration());
-        Workout workout = new Workout(0, userId, workoutDTO.getType(), workoutDTO.getDuration(), caloriesBurned);
+
+        Workout workout = new Workout(0, workoutDTO.getType(), workoutDTO.getDuration(), caloriesBurned, userId);
+
         workoutRepository.save(workout);
     }
 
@@ -62,6 +70,8 @@ public class WorkoutService {
             existingWorkout.setType(workoutDTO.getType());
             existingWorkout.setDuration(workoutDTO.getDuration());
             existingWorkout.setCaloriesBurned(calculateCalories(workoutDTO.getType(), workoutDTO.getDuration()));
+
+            workoutRepository.update(existingWorkout);
         }
     }
 
@@ -99,7 +109,7 @@ public class WorkoutService {
             case "running":
                 return duration * 12;  // Бег сжигает примерно 12 калорий/мин
             case "cycling":
-                return duration * 7;   // Велосипед сжигает примерно - 6 калорий/мин
+                return duration * 7;   // Велосипед сжигает примерно - 7 калорий/мин
             case "swimming":
                 return duration * 8;  // Плавание сжигает примерно - 8 калорий/мин
             case "yoga":

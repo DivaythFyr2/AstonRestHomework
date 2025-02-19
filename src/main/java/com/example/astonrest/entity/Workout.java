@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Workout {
     private int id;
-    private int userId;
     private String type;
     private int duration;       // Время тренировки (минуты)
     private int caloriesBurned;
+    private int userId;
 }
