@@ -2,8 +2,10 @@ package com.example.astonrest.service;
 
 import com.example.astonrest.dto.MealDTO;
 import com.example.astonrest.entity.Meal;
+import com.example.astonrest.exception.NotFoundException;
 import com.example.astonrest.mapper.MealMapper;
 import com.example.astonrest.repository.MealRepository;
+import com.example.astonrest.util.MealValidator;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,6 +22,7 @@ public class MealService {
      * @param mealDTO DTO еды
      */
     public void createMeal(MealDTO mealDTO) {
+        MealValidator.validate(mealDTO);
         Meal meal = MealMapper.toEntity(mealDTO);
         mealRepository.save(meal);
     }
@@ -64,6 +67,10 @@ public class MealService {
      * @param id ID еды
      */
     public void deleteMeal(int id) {
+        MealDTO meal = getMeal(id);
+        if(meal == null) {
+            throw new NotFoundException("Meal with ID " + id + " not found.");
+        }
         mealRepository.delete(id);
     }
 
