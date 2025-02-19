@@ -1,11 +1,14 @@
 package com.example.astonrest.controller;
 
 import com.example.astonrest.dto.WorkoutDTO;
+import com.example.astonrest.exception.BadRequestException;
+import com.example.astonrest.exception.CustomException;
+import com.example.astonrest.exception.ExceptionHandler;
+import com.example.astonrest.exception.NotFoundException;
 import com.example.astonrest.repository.UserRepository;
 import com.example.astonrest.repository.WorkoutRepository;
 import com.example.astonrest.service.WorkoutService;
 import com.google.gson.Gson;
-
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -13,7 +16,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Arrays;
 import java.util.List;
 
 
@@ -34,40 +36,40 @@ public class WorkoutServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType(CONTENT_TYPE);
         response.setCharacterEncoding("UTF-8");
+
         PrintWriter out = response.getWriter();
-
         String pathInfo = request.getPathInfo();
-        System.out.println("DEBUG: pathInfo = " + pathInfo);
 
-        if (pathInfo == null || pathInfo.equals("/")) {
-            List<WorkoutDTO> workouts = workoutService.getAllWorkouts();
-            out.print(gson.toJson(workouts));
-        } else {
-            String[] pathParts = pathInfo.split("/");
-            System.out.println("DEBUG: pathParts = " + Arrays.toString(pathParts));
-
-            try {
+        try {
+            if (pathInfo == null || pathInfo.equals("/")) {
+                List<WorkoutDTO> workouts = workoutService.getAllWorkouts();
+                out.print(gson.toJson(workouts));
+            } else {
+                String[] pathParts = pathInfo.split("/");
                 if (pathParts.length == 2) {
                     int workoutId = Integer.parseInt(pathParts[1]);
                     WorkoutDTO workout = workoutService.getWorkoutById(workoutId);
                     if (workout != null) {
                         out.print(gson.toJson(workout));
                     } else {
-                        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-                        out.print("{\"error\": \"Workout not found\"}");
+                        throw new NotFoundException("Workout not found");
                     }
                 } else if (pathParts.length == 3 && "users".equals(pathParts[1])) {
                     int userId = Integer.parseInt(pathParts[2]);
                     List<WorkoutDTO> workouts = workoutService.getWorkoutsByUserId(userId);
                     out.print(gson.toJson(workouts));
                 } else {
-                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    out.print("{\"error\": \"Invalid request format\"}");
+                    throw new BadRequestException("Invalid request format");
                 }
-            } catch (NumberFormatException e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                out.print("{\"error\": \"Invalid ID format\"}");
             }
+        } catch (NumberFormatException e) {
+            ExceptionHandler.handleException(response, new BadRequestException("Invalid ID format"),
+                    HttpServletResponse.SC_BAD_REQUEST);
+        } catch (NotFoundException e) {
+            ExceptionHandler.handleException(response, e, HttpServletResponse.SC_NOT_FOUND);
+        } catch (Exception e) {
+            ExceptionHandler.handleException(response, new CustomException("Internal Server Error"),
+                    HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
         out.flush();
     }
@@ -79,25 +81,22 @@ public class WorkoutServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType(CONTENT_TYPE);
         response.setCharacterEncoding("UTF-8");
-        PrintWriter out = response.getWriter();
 
+        PrintWriter out = response.getWriter();
         String pathInfo = request.getPathInfo();
         System.out.println("DEBUG: Received POST request, pathInfo = " + pathInfo);
 
         if (pathInfo == null || !pathInfo.startsWith("/users/")) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            out.print("{\"error\": \"Invalid endpoint. Use /users/{id}/workouts\"}");
-            out.flush();
+            ExceptionHandler.handleException(response, new BadRequestException("Invalid endpoint. Use /users/{id}/workouts"),
+                    HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
         String[] pathParts = pathInfo.split("/");
-        System.out.println("DEBUG: pathParts = " + Arrays.toString(pathParts));
 
         if (pathParts.length != 3 || !pathParts[1].equals("users")) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            out.print("{\"error\": \"Invalid request format. Use /workouts/users/{id}\"}");
-            out.flush();
+            ExceptionHandler.handleException(response, new BadRequestException("Invalid request Format. Use /workouts/users/{id}"),
+                    HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
@@ -105,22 +104,22 @@ public class WorkoutServlet extends HttpServlet {
             int userId = Integer.parseInt(pathParts[2]);
             BufferedReader reader = request.getReader();
             WorkoutDTO workoutDTO = gson.fromJson(reader, WorkoutDTO.class);
+            System.out.println("DEBUG: Parsed WorkoutDTO: " + gson.toJson(workoutDTO));
 
-            System.out.println("DEBUG: Creating workout for userId = " + userId);
-            System.out.println("DEBUG: Workout data = " + gson.toJson(workoutDTO));
+            workoutService.createWorkoutForUser(workoutDTO, userId);
+            response.setStatus(HttpServletResponse.SC_CREATED);
+            out.print("{\"message\": \"Workout created successfully\"}");
 
-            try {
-                workoutService.createWorkoutForUser(workoutDTO, userId);
-                response.setStatus(HttpServletResponse.SC_CREATED);
-                out.print("{\"message\": \"Workout created successfully\"}");
-            } catch (IllegalArgumentException e) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                out.print("{\"error\": \"Invalid user ID format\"}");
-            }
         } catch (NumberFormatException e) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            out.print("{\"error\": \"Invalid user ID format\"}");
+            ExceptionHandler.handleException(response, new BadRequestException("Invalid user ID format"),
+                    HttpServletResponse.SC_BAD_REQUEST);
+        } catch (BadRequestException | NotFoundException e) {
+            ExceptionHandler.handleException(response, e, HttpServletResponse.SC_BAD_REQUEST);
+        } catch (Exception e) {
+            ExceptionHandler.handleException(response, new CustomException("Internal Server Error"),
+                    HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
+
         out.flush();
     }
 
@@ -131,13 +130,13 @@ public class WorkoutServlet extends HttpServlet {
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType(CONTENT_TYPE);
         response.setCharacterEncoding("UTF-8");
-        PrintWriter out = response.getWriter();
 
+        PrintWriter out = response.getWriter();
         String pathInfo = request.getPathInfo();
+
         if (pathInfo == null || pathInfo.equals("/")) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            out.print("{\"error\": \"Invalid ID is required\"}");
-            out.flush();
+            ExceptionHandler.handleException(response, new BadRequestException("Invalid ID is required."),
+                    HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
@@ -147,12 +146,17 @@ public class WorkoutServlet extends HttpServlet {
             WorkoutDTO workoutDTO = gson.fromJson(reader, WorkoutDTO.class);
 
             workoutService.updateWorkout(id, workoutDTO);
-
             out.print("{\"message\": \"Workout updated successfully\"}");
         } catch (NumberFormatException e) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            out.print("{\"error\": \"Invalid workout ID format\"}");
+            ExceptionHandler.handleException(response, new BadRequestException("Invalid workout ID format"),
+                    HttpServletResponse.SC_BAD_REQUEST);
+        } catch (NotFoundException | BadRequestException e) {
+            ExceptionHandler.handleException(response, e, HttpServletResponse.SC_BAD_REQUEST);
+        } catch (Exception e) {
+            ExceptionHandler.handleException(response, new CustomException("Internal Server Error"),
+                    HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
+
         out.flush();
     }
 
@@ -163,13 +167,13 @@ public class WorkoutServlet extends HttpServlet {
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.setContentType(CONTENT_TYPE);
         response.setCharacterEncoding("UTF-8");
-        PrintWriter out = response.getWriter();
 
+        PrintWriter out = response.getWriter();
         String pathInfo = request.getPathInfo();
+
         if (pathInfo == null || pathInfo.equals("/")) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            out.print("{\"error\": \"Workout ID is required\"}");
-            out.flush();
+            ExceptionHandler.handleException(response, new BadRequestException("Workout ID is required."),
+                    HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
@@ -177,10 +181,17 @@ public class WorkoutServlet extends HttpServlet {
             int id = Integer.parseInt(pathInfo.substring(1));
             workoutService.deleteWorkout(id);
             out.print("{\"message\": \"Workout deleted successfully\"}");
+
         } catch (NumberFormatException e) {
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            out.print("{\"error\": \"Invalid workout ID format\"}");
+            ExceptionHandler.handleException(response, new BadRequestException("Invalid workout ID format"),
+                    HttpServletResponse.SC_BAD_REQUEST);
+        } catch (NotFoundException e) {
+            ExceptionHandler.handleException(response, e, HttpServletResponse.SC_NOT_FOUND);
+        } catch (Exception e) {
+            ExceptionHandler.handleException(response, new CustomException("Internal Server Error"),
+                    HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
+
         out.flush();
     }
 }

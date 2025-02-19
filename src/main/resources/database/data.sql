@@ -6,9 +6,9 @@ INSERT INTO users (name, age, weight, height) VALUES
 
 -- Добавляем тренировки для пользователей
 INSERT INTO workouts (type, duration, calories_burned, user_id) VALUES
-                                                                    ('running', 30, 360, 1),  -- Тренировка для Alice
-                                                                    ('cycling', 45, 315, 2),  -- Тренировка для Bob
-                                                                    ('swimming', 60, 480, 3); -- Тренировка для Charlie
+                                                                    ('running', 30, 360, 1),
+                                                                    ('cycling', 45, 315, 2),
+                                                                    ('swimming', 60, 480, 3);
 
 -- Добавляем блюда
 INSERT INTO meals (name, calories) VALUES
@@ -19,7 +19,7 @@ INSERT INTO meals (name, calories) VALUES
 
 -- Связываем пользователей с приёмами пищи
 INSERT INTO user_meals (user_id, meal_id) VALUES
-                                              (1, 1), -- Alice ела Chicken Salad
-                                              (1, 3), -- Alice ела Oatmeal
-                                              (2, 2), -- Bob ел Steak
-                                              (3, 4); -- Charlie ел Pasta
+                                              (1, 1),
+                                              (1, 3),
+                                              (2, 2),
+                                              (3, 4);

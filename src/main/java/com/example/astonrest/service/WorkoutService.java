@@ -2,9 +2,11 @@ package com.example.astonrest.service;
 
 import com.example.astonrest.dto.WorkoutDTO;
 import com.example.astonrest.entity.Workout;
+import com.example.astonrest.exception.NotFoundException;
 import com.example.astonrest.mapper.WorkoutMapper;
 import com.example.astonrest.repository.UserRepository;
 import com.example.astonrest.repository.WorkoutRepository;
+import com.example.astonrest.util.WorkoutValidator;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,13 +27,16 @@ public class WorkoutService {
      * @param userId     ID пользователя
      */
     public void createWorkoutForUser(WorkoutDTO workoutDTO, int userId) {
+        System.out.println("DEBUG: createWorkoutForUser called with userId = " + userId);
+        System.out.println("DEBUG: WorkoutDTO = " + workoutDTO.getType() + ", " + workoutDTO.getDuration());
+
         if(!userRepository.doesUserExist(userId)) {
-            throw new IllegalArgumentException("User with ID " + userId + " does not exist.");
+            throw new NotFoundException("User with ID " + userId + " does not exist.");
         }
+        WorkoutValidator.validate(workoutDTO);
         int caloriesBurned = calculateCalories(workoutDTO.getType(), workoutDTO.getDuration());
 
         Workout workout = new Workout(0, workoutDTO.getType(), workoutDTO.getDuration(), caloriesBurned, userId);
-
         workoutRepository.save(workout);
     }
 
@@ -81,6 +86,10 @@ public class WorkoutService {
      * @param id ID тренировки
      */
     public void deleteWorkout(int id) {
+        WorkoutDTO workout = getWorkoutById(id);
+        if(workout == null) {
+            throw new NotFoundException("Workout with ID " + id + " not found.");
+        }
         workoutRepository.delete(id);
     }
 
