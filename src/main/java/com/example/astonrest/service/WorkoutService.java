@@ -27,9 +27,6 @@ public class WorkoutService {
      * @param userId     ID пользователя
      */
     public void createWorkoutForUser(WorkoutDTO workoutDTO, int userId) {
-        System.out.println("DEBUG: createWorkoutForUser called with userId = " + userId);
-        System.out.println("DEBUG: WorkoutDTO = " + workoutDTO.getType() + ", " + workoutDTO.getDuration());
-
         if(!userRepository.doesUserExist(userId)) {
             throw new NotFoundException("User with ID " + userId + " does not exist.");
         }
