@@ -43,10 +43,12 @@ public class MealServlet extends HttpServlet {
             if (pathInfo == null || pathInfo.equals("/")) {
                 List<MealDTO> meals = mealService.getAllMeals();
                 out.print(gson.toJson(meals));
+                response.setStatus(HttpServletResponse.SC_OK);
             } else if (pathInfo.startsWith("/user/")) {
                 int userId = Integer.parseInt(pathInfo.substring(6));
                 List<MealDTO> meals = mealService.getMealsByUserId(userId);
                 out.print(gson.toJson(meals));
+                response.setStatus(HttpServletResponse.SC_OK);
             } else {
                 int id = Integer.parseInt(pathInfo.substring(1));
                 MealDTO meal = mealService.getMeal(id);
@@ -54,6 +56,7 @@ public class MealServlet extends HttpServlet {
                     throw new NotFoundException("Meal not found");
                 }
                 out.print(gson.toJson(meal));
+                response.setStatus(HttpServletResponse.SC_OK);
             }
         } catch (NumberFormatException e) {
             ExceptionHandler.handleException(response, new BadRequestException("Invalid meal ID format"),
@@ -117,6 +120,7 @@ public class MealServlet extends HttpServlet {
             MealDTO mealDTO = gson.fromJson(reader, MealDTO.class);
 
             mealService.updateMeal(id, mealDTO);
+            response.setStatus(HttpServletResponse.SC_OK);
             out.print("{\"message\": \"Meal updated successfully\"}");
         } catch (NumberFormatException e) {
             ExceptionHandler.handleException(response, new BadRequestException("Invalid meal ID format"),
@@ -151,6 +155,7 @@ public class MealServlet extends HttpServlet {
         try {
             int id = Integer.parseInt(pathInfo.substring(1));
             mealService.deleteMeal(id);
+            response.setStatus(HttpServletResponse.SC_NO_CONTENT);
             out.print("{\"message\": \"Meal deleted successfully\"}");
         } catch (NumberFormatException e) {
             ExceptionHandler.handleException(response, new BadRequestException("Invalid meal ID format"),
