@@ -53,6 +53,7 @@ public class UserServlet extends HttpServlet {
             if (pathInfo == null || pathInfo.equals("/")) {
                 List<UserDTO> users = userService.getAllUsers();
                 out.print(gson.toJson(users));
+                response.setStatus(HttpServletResponse.SC_OK); //
             } else {
                 String[] pathParts = pathInfo.split("/");
                 if (pathParts.length == 2) {
@@ -62,14 +63,17 @@ public class UserServlet extends HttpServlet {
                         throw new NotFoundException("User not found");
                     }
                     out.print(gson.toJson(user));
+                    response.setStatus(HttpServletResponse.SC_OK); //
                 } else if (pathParts.length == 3) {
                     int userId = Integer.parseInt(pathParts[1]);
                     if ("workouts".equals(pathParts[2])) {
                         List<WorkoutDTO> userWorkouts = workoutService.getWorkoutsByUserId(userId);
                         out.print(gson.toJson(userWorkouts));
+                        response.setStatus(HttpServletResponse.SC_OK);
                     } else if ("meals".equals(pathParts[2])) {
                         List<MealDTO> userMeals = mealService.getMealsByUserId(userId);
                         out.print(gson.toJson(userMeals));
+                        response.setStatus(HttpServletResponse.SC_OK);
                     } else {
                         throw new BadRequestException("Invalid request format.");
                     }
@@ -135,6 +139,7 @@ public class UserServlet extends HttpServlet {
             UserDTO userDTO = gson.fromJson(reader, UserDTO.class);
 
             userService.updateUser(id, userDTO);
+            response.setStatus(HttpServletResponse.SC_OK);
             out.print("{\"message\": \"User updated successfully\"}");
         } catch (NumberFormatException e) {
             ExceptionHandler.handleException(response, new BadRequestException("Invalid user ID format"),
@@ -169,6 +174,7 @@ public class UserServlet extends HttpServlet {
         try {
             int id = Integer.parseInt(pathInfo.substring(1));
             userService.deleteUser(id);
+            response.setStatus(HttpServletResponse.SC_NO_CONTENT);
             out.print("{\"message\": \"User deleted successfully\"}");
         } catch (NumberFormatException e) {
             ExceptionHandler.handleException(response, new BadRequestException("Invalid user ID format"),

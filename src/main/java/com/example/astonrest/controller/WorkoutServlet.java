@@ -44,6 +44,7 @@ public class WorkoutServlet extends HttpServlet {
             if (pathInfo == null || pathInfo.equals("/")) {
                 List<WorkoutDTO> workouts = workoutService.getAllWorkouts();
                 out.print(gson.toJson(workouts));
+                response.setStatus(HttpServletResponse.SC_OK);
             } else {
                 String[] pathParts = pathInfo.split("/");
                 if (pathParts.length == 2) {
@@ -51,6 +52,7 @@ public class WorkoutServlet extends HttpServlet {
                     WorkoutDTO workout = workoutService.getWorkoutById(workoutId);
                     if (workout != null) {
                         out.print(gson.toJson(workout));
+                        response.setStatus(HttpServletResponse.SC_OK);
                     } else {
                         throw new NotFoundException("Workout not found");
                     }
@@ -58,6 +60,7 @@ public class WorkoutServlet extends HttpServlet {
                     int userId = Integer.parseInt(pathParts[2]);
                     List<WorkoutDTO> workouts = workoutService.getWorkoutsByUserId(userId);
                     out.print(gson.toJson(workouts));
+                    response.setStatus(HttpServletResponse.SC_OK);
                 } else {
                     throw new BadRequestException("Invalid request format");
                 }
@@ -146,6 +149,7 @@ public class WorkoutServlet extends HttpServlet {
             WorkoutDTO workoutDTO = gson.fromJson(reader, WorkoutDTO.class);
 
             workoutService.updateWorkout(id, workoutDTO);
+            response.setStatus(HttpServletResponse.SC_OK);
             out.print("{\"message\": \"Workout updated successfully\"}");
         } catch (NumberFormatException e) {
             ExceptionHandler.handleException(response, new BadRequestException("Invalid workout ID format"),
@@ -180,6 +184,7 @@ public class WorkoutServlet extends HttpServlet {
         try {
             int id = Integer.parseInt(pathInfo.substring(1));
             workoutService.deleteWorkout(id);
+            response.setStatus(HttpServletResponse.SC_NO_CONTENT);
             out.print("{\"message\": \"Workout deleted successfully\"}");
 
         } catch (NumberFormatException e) {
