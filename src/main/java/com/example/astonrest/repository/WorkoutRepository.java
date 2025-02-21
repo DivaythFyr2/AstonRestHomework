@@ -30,6 +30,11 @@ public class WorkoutRepository {
 
             preparedStatement.executeUpdate();
 
+            ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                workout.setId(generatedKeys.getInt(1));
+            }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
