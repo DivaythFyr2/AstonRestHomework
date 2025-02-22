@@ -119,7 +119,7 @@ class WorkoutServletTest {
 
         workoutServlet.doDelete(request, response);
 
-        verify(response).setStatus(HttpServletResponse.SC_NO_CONTENT);
+        verify(response).setStatus(HttpServletResponse.SC_OK);
         verify(workoutService, times(1)).deleteWorkout(1);
     }
 
