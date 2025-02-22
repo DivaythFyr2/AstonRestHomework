@@ -87,7 +87,6 @@ public class WorkoutServlet extends HttpServlet {
 
         PrintWriter out = response.getWriter();
         String pathInfo = request.getPathInfo();
-        System.out.println("DEBUG: Received POST request, pathInfo = " + pathInfo);
 
         if (pathInfo == null || !pathInfo.startsWith("/users/")) {
             ExceptionHandler.handleException(response, new BadRequestException("Invalid endpoint. Use /users/{id}/workouts"),
@@ -107,7 +106,6 @@ public class WorkoutServlet extends HttpServlet {
             int userId = Integer.parseInt(pathParts[2]);
             BufferedReader reader = request.getReader();
             WorkoutDTO workoutDTO = gson.fromJson(reader, WorkoutDTO.class);
-            System.out.println("DEBUG: Parsed WorkoutDTO: " + gson.toJson(workoutDTO));
 
             workoutService.createWorkoutForUser(workoutDTO, userId);
             response.setStatus(HttpServletResponse.SC_CREATED);
@@ -184,7 +182,7 @@ public class WorkoutServlet extends HttpServlet {
         try {
             int id = Integer.parseInt(pathInfo.substring(1));
             workoutService.deleteWorkout(id);
-            response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+            response.setStatus(HttpServletResponse.SC_OK);
             out.print("{\"message\": \"Workout deleted successfully\"}");
 
         } catch (NumberFormatException e) {

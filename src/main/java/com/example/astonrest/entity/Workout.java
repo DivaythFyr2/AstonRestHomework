@@ -11,6 +11,6 @@ public class Workout {
     private int id;
     private String type;
     private int duration;       // Время тренировки (минуты)
-    private int caloriesBurned;
+    private int caloriesBurned; // Сколько калорий было сожжено на тренировке
     private int userId;
 }
