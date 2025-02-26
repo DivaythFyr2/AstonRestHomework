@@ -3,20 +3,28 @@ package com.example.astonrest.config;
 import com.example.astonrest.controller.MealServlet;
 import com.example.astonrest.controller.UserServlet;
 import com.example.astonrest.controller.WorkoutServlet;
-import com.example.astonrest.util.DatabaseUtil;
-import jakarta.servlet.*;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
+import jakarta.servlet.ServletRegistration;
 import jakarta.servlet.annotation.WebListener;
 
+/**
+ * Конфигурационный класс для регистрации сервлетов в контексте приложения.
+ * Автоматически выполняет регистрацию сервлетов при запуске веб-приложения.
+ */
 @WebListener
 public class ServletConfig implements ServletContextListener {
 
+    /**
+     * Вызывается при инициализации контекста сервлетов.
+     * Регистрирует сервлеты пользователей, приемов пищи и тренировок.
+     *
+     * @param servletContextEvent событие инициализации контекста сервлетов
+     */
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
         ServletContext servletContext = servletContextEvent.getServletContext();
-
-        //DatabaseUtil.executeSQLFile("src/main/resources/database/drop.sql");
-        //DatabaseUtil.executeSQLFile("src/main/resources/database/schema.sql");
-        //DatabaseUtil.executeSQLFile("src/main/resources/database/data.sql");
 
         ServletRegistration.Dynamic userServlet = servletContext.addServlet("UserServlet", new UserServlet());
         userServlet.addMapping("/users/*");

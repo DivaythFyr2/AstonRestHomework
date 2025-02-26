@@ -27,13 +27,12 @@ class WorkoutServletTest {
     @Mock
     private HttpServletResponse response;
 
-    private WorkoutServlet workoutServlet;
-    private final Gson gson = new Gson();
-
     private static final List<WorkoutDTO> EXPECTED_WORKOUTS_DTOS = List.of(
             new WorkoutDTO("Running", 30, 360, 1),
             new WorkoutDTO("Cycling", 45, 315, 2)
     );
+    private final Gson gson = new Gson();
+    private WorkoutServlet workoutServlet;
 
     @BeforeEach
     void setUp() throws Exception {

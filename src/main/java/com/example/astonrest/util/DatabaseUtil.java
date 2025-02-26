@@ -1,18 +1,18 @@
 package com.example.astonrest.util;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.Statement;
 import java.util.Objects;
 import java.util.Properties;
-import java.util.stream.Collectors;
 
 public class DatabaseUtil {
-    private static String driver;
-    private static String url;
-    private static String username;
-    private static String password;
+    private static final String driver;
+    private static final String url;
+    private static final String username;
+    private static final String password;
 
     static {
         Properties prop = new Properties();
@@ -40,19 +40,4 @@ public class DatabaseUtil {
             throw new RuntimeException("Ошибка подключения к базе данных");
         }
     }
-
-    /*public static void executeSQLFile(String filePath) {
-        try (Connection conn = getConnection();
-             Statement stmt = conn.createStatement();
-             BufferedReader reader = new BufferedReader(new InputStreamReader(
-                     Objects.requireNonNull(DatabaseUtil.class.getClassLoader().getResourceAsStream(filePath))))) {
-
-            String sql = reader.lines().collect(Collectors.joining("\n"));
-            stmt.execute(sql);
-            System.out.println("Выполнен SQL-файл: " + filePath);
-
-        } catch (Exception e) {
-            throw new RuntimeException("Ошибка выполнения SQL-файла: " + filePath, e);
-        }
-    }*/
 }
