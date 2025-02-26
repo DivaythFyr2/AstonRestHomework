@@ -35,14 +35,12 @@ class UserServletTest {
     @Mock
     private HttpServletResponse response;
 
-    private UserServlet userServlet;
-    private final Gson gson = new Gson();
-
     private static final List<UserDTO> EXPECTED_USERS_DTOS = List.of(
             new UserDTO("Alice", 28, 60.0, 170),
             new UserDTO("Bob", 32, 82.5, 185)
     );
-
+    private final Gson gson = new Gson();
+    private UserServlet userServlet;
 
     @BeforeEach
     void setUp() throws Exception {

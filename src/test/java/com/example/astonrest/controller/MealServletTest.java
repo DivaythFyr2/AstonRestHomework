@@ -19,22 +19,23 @@ import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class MealServletTest {
-    @Mock private MealService mealService;
-    @Mock private HttpServletRequest request;
-    @Mock private HttpServletResponse response;
-
-    private MealServlet mealServlet;
-    private final Gson gson = new Gson();
+    @Mock
+    private MealService mealService;
+    @Mock
+    private HttpServletRequest request;
+    @Mock
+    private HttpServletResponse response;
 
     private static final List<MealDTO> EXPECTED_MEALS_DTOS = List.of(
             new MealDTO("Pasta", 500),
             new MealDTO("Salad", 200)
     );
+    private final Gson gson = new Gson();
+    private MealServlet mealServlet;
 
     @BeforeEach
     void setUp() throws Exception {

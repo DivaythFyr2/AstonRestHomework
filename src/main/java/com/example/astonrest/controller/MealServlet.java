@@ -1,6 +1,8 @@
 package com.example.astonrest.controller;
 
+import com.example.astonrest.constants.ApiConstants;
 import com.example.astonrest.dto.MealDTO;
+import com.example.astonrest.dto.MessageResponseDTO;
 import com.example.astonrest.exception.BadRequestException;
 import com.example.astonrest.exception.CustomException;
 import com.example.astonrest.exception.ExceptionHandler;
@@ -17,11 +19,13 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
-
+/**
+ * Сервлет для управления приёмами пищи.
+ * Обрабатывает HTTP-запросы для получения, создания, обновления и удаления приёмов пищи.
+ */
 public class MealServlet extends HttpServlet {
-    private MealService mealService;
     private final Gson gson = new Gson();
-    private static final String CONTENT_TYPE = "application/json";
+    private MealService mealService;
 
     @Override
     public void init() {
@@ -33,38 +37,24 @@ public class MealServlet extends HttpServlet {
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType(CONTENT_TYPE);
-        response.setCharacterEncoding("UTF-8");
+        setupResponse(response);
 
         PrintWriter out = response.getWriter();
         String pathInfo = request.getPathInfo();
 
         try {
-            if (pathInfo == null || pathInfo.equals("/")) {
-                List<MealDTO> meals = mealService.getAllMeals();
-                out.print(gson.toJson(meals));
-                response.setStatus(HttpServletResponse.SC_OK);
-            } else if (pathInfo.startsWith("/user/")) {
-                int userId = Integer.parseInt(pathInfo.substring(6));
-                List<MealDTO> meals = mealService.getMealsByUserId(userId);
-                out.print(gson.toJson(meals));
-                response.setStatus(HttpServletResponse.SC_OK);
-            } else {
-                int id = Integer.parseInt(pathInfo.substring(1));
-                MealDTO meal = mealService.getMeal(id);
-                if (meal == null) {
-                    throw new NotFoundException("Meal not found");
-                }
-                out.print(gson.toJson(meal));
-                response.setStatus(HttpServletResponse.SC_OK);
-            }
+            Object responseBody = isRootPath(pathInfo) ? getAllMeals() : processMealRequest(pathInfo);
+
+            out.print(gson.toJson(responseBody));
+            response.setStatus(HttpServletResponse.SC_OK);
+
         } catch (NumberFormatException e) {
-            ExceptionHandler.handleException(response, new BadRequestException("Invalid meal ID format"),
+            ExceptionHandler.handleException(response, new BadRequestException(ApiConstants.INVALID_MEAL_ID),
                     HttpServletResponse.SC_BAD_REQUEST);
         } catch (NotFoundException e) {
             ExceptionHandler.handleException(response, e, HttpServletResponse.SC_NOT_FOUND);
         } catch (Exception e) {
-            ExceptionHandler.handleException(response, new CustomException("Internal Server Error"),
+            ExceptionHandler.handleException(response, new CustomException(ApiConstants.INTERNAL_SERVER_ERROR),
                     HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
 
@@ -76,8 +66,8 @@ public class MealServlet extends HttpServlet {
      */
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType(CONTENT_TYPE);
-        response.setCharacterEncoding("UTF-8");
+        setupResponse(response);
+
         PrintWriter out = response.getWriter();
         try {
             BufferedReader reader = request.getReader();
@@ -85,12 +75,12 @@ public class MealServlet extends HttpServlet {
 
             mealService.createMeal(mealDTO);
             response.setStatus(HttpServletResponse.SC_CREATED);
-            out.print("{\"message\": \"Meal created successfully\"}");
+            out.print(new MessageResponseDTO(ApiConstants.MEAL_CREATED_SUCCESSFULLY).toJson());
 
         } catch (BadRequestException e) {
             ExceptionHandler.handleException(response, e, HttpServletResponse.SC_BAD_REQUEST);
         } catch (Exception e) {
-            ExceptionHandler.handleException(response, new CustomException("Internal Server Error"),
+            ExceptionHandler.handleException(response, new CustomException(ApiConstants.INTERNAL_SERVER_ERROR),
                     HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
 
@@ -102,14 +92,13 @@ public class MealServlet extends HttpServlet {
      */
     @Override
     protected void doPut(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType(CONTENT_TYPE);
-        response.setCharacterEncoding("UTF-8");
+        setupResponse(response);
 
         PrintWriter out = response.getWriter();
         String pathInfo = request.getPathInfo();
 
-        if (pathInfo == null || pathInfo.equals("/")) {
-            ExceptionHandler.handleException(response, new BadRequestException("Meal ID is required"),
+        if (isRootPath(pathInfo)) {
+            ExceptionHandler.handleException(response, new BadRequestException(ApiConstants.MEAL_ID_IS_REQUIRED),
                     HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
@@ -121,14 +110,14 @@ public class MealServlet extends HttpServlet {
 
             mealService.updateMeal(id, mealDTO);
             response.setStatus(HttpServletResponse.SC_OK);
-            out.print("{\"message\": \"Meal updated successfully\"}");
+            out.print(new MessageResponseDTO(ApiConstants.MEAL_UPDATED_SUCCESSFULLY).toJson());
         } catch (NumberFormatException e) {
-            ExceptionHandler.handleException(response, new BadRequestException("Invalid meal ID format"),
+            ExceptionHandler.handleException(response, new BadRequestException(ApiConstants.INVALID_MEAL_ID),
                     HttpServletResponse.SC_BAD_REQUEST);
         } catch (NotFoundException | BadRequestException e) {
             ExceptionHandler.handleException(response, e, HttpServletResponse.SC_BAD_REQUEST);
         } catch (Exception e) {
-            ExceptionHandler.handleException(response, new CustomException("Internal Server Error"),
+            ExceptionHandler.handleException(response, new CustomException(ApiConstants.INTERNAL_SERVER_ERROR),
                     HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
 
@@ -140,14 +129,13 @@ public class MealServlet extends HttpServlet {
      */
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType(CONTENT_TYPE);
-        response.setCharacterEncoding("UTF-8");
+        setupResponse(response);
 
         PrintWriter out = response.getWriter();
         String pathInfo = request.getPathInfo();
 
-        if (pathInfo == null || pathInfo.equals("/")) {
-            ExceptionHandler.handleException(response, new BadRequestException("Meal ID is required."),
+        if (isRootPath(pathInfo)) {
+            ExceptionHandler.handleException(response, new BadRequestException(ApiConstants.MEAL_ID_IS_REQUIRED),
                     HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
@@ -156,17 +144,72 @@ public class MealServlet extends HttpServlet {
             int id = Integer.parseInt(pathInfo.substring(1));
             mealService.deleteMeal(id);
             response.setStatus(HttpServletResponse.SC_NO_CONTENT);
-            out.print("{\"message\": \"Meal deleted successfully\"}");
+            out.print(new MessageResponseDTO(ApiConstants.MEAL_DELETED_SUCCESSFULLY).toJson());
         } catch (NumberFormatException e) {
-            ExceptionHandler.handleException(response, new BadRequestException("Invalid meal ID format"),
+            ExceptionHandler.handleException(response, new BadRequestException(ApiConstants.INVALID_MEAL_ID),
                     HttpServletResponse.SC_BAD_REQUEST);
         } catch (NotFoundException e) {
             ExceptionHandler.handleException(response, e, HttpServletResponse.SC_NOT_FOUND);
         } catch (Exception e) {
-            ExceptionHandler.handleException(response, new CustomException("Internal Server Error"),
+            ExceptionHandler.handleException(response, new CustomException(ApiConstants.INTERNAL_SERVER_ERROR),
                     HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
 
         out.flush();
+    }
+
+    // Вспомогательные методы для разгрузки сервлетов (Они не должны находиться в классе Servlet)
+
+    /**
+     * Проверяет, является ли путь корневым.
+     */
+    private boolean isRootPath(String pathInfo) {
+        return pathInfo == null || pathInfo.equals(ApiConstants.ROOT_PATH);
+    }
+
+    /**
+     * Обрабатывает запрос на получение конкретного приёма пищи или списка приёмов пользователя.
+     */
+    private Object processMealRequest(String pathInfo) {
+        if(pathInfo.startsWith(ApiConstants.USER_PATH_WITH_SLASH)) {
+            return getMealsByUserId(pathInfo.substring(ApiConstants.USER_PATH_WITH_SLASH.length()));
+        } else {
+            return getMealById(pathInfo.substring(1));
+        }
+    }
+
+    /**
+     * Получает список всех приёмов пищи.
+     */
+    private List<MealDTO> getAllMeals() {
+        return mealService.getAllMeals();
+    }
+
+    /**
+     * Получает приёмы пищи пользователя по id.
+     */
+    private List<MealDTO> getMealsByUserId(String userIdStr) {
+        int userId = Integer.parseInt(userIdStr);
+        return mealService.getMealsByUserId(userId);
+    }
+
+    /**
+     * Получает приём пищи по id.
+     */
+    private MealDTO getMealById(String mealIdStr) {
+        int mealId = Integer.parseInt(mealIdStr);
+        MealDTO meal = mealService.getMeal(mealId);
+        if(meal == null) {
+            throw new NotFoundException(ApiConstants.MEAL_NOT_FOUND);
+        }
+        return meal;
+    }
+
+    /**
+     * Устанавливает заголовки ответа.
+     */
+    private void setupResponse(HttpServletResponse response) {
+        response.setContentType(ApiConstants.CONTENT_TYPE);
+        response.setCharacterEncoding(ApiConstants.CHARACTER_ENCODING);
     }
 }
